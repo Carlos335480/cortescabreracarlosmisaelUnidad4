@@ -15,23 +15,53 @@ services:
   php_app_1:
     build: .
     container_name: dwi_app_node1
-    env_file:
-      - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - sqlserver
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${SA_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
     networks:
       - dwi_network
 
   php_app_2:
     build: .
     container_name: dwi_app_node2
-    env_file:
-      - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - sqlserver
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${SA_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
+    networks:
+      - dwi_network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dwi_sqlserver
+    environment:
+      SA_PASSWORD: "${SA_PASSWORD}"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
     networks:
       - dwi_network
 
 networks:
   dwi_network:
     driver: bridge
+
+volumes:
+  sql_data:
+    external: true
+    name: dwi_u3_sql_data
